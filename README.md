@@ -13,11 +13,9 @@ framework [Flask](https://flask.palletsprojects.com/es/latest/) y conectándose 
 - Flask-JWT-Extended
 - pymongo
 
-## Installation
+## Instrucciones de instalación
 
-Desde una termina siga las siguientes intrucciones
-
-### Clonar el proyecto
+### Descargue el repositorio desde GitHub
 
 ```shell
 git clone https://github.com/mcubico/api-py-flask-mongo.git
@@ -25,22 +23,23 @@ git clone https://github.com/mcubico/api-py-flask-mongo.git
 
 ### Crear el ambiente de trabajo
 
-Después de descargar el proyecto ubiquese en ese directorio y ejecute el siguiente comando para crear el ambiente de trabajo:
+Después de descargar el proyecto ubíquese en ese directorio y ejecute el siguiente comando para 
+crear el ambiente de trabajo:
 
 ```shell
-py -3 -m venv .venv
+py -3 -m venv venv
 ```
 
 #### Activar el ambiente de trabajo
 
 ```shell
-.venv\Scripts\activate
+venv\Scripts\activate
 ```
 
 ### Instale las dependencias del proyecto
 
 ```shell
-pip install -r requirements.txt
+(venv) pip install -r requirements.txt
 ```
 
 ## Estructura del proyecto
@@ -106,18 +105,66 @@ py
 
 Las demás variables deben ser diligenciadas con los datos de la cuenta de mongo
 
+## Estructura de la Base de datos
+
+### Colecciones
+
+| `Name`   | `Comment`                                       |
+|----------|-------------------------------------------------|
+| Users    | Usuarios con permisos de interacción con la API |
+| Risks    | Colección con los riesgos                       |
+| Features | Características de los riesgos                  |
+
+#### Users
+| `Nombre` | `Tipo`   |
+|----------|----------|
+| _id      | ObjectId |
+| username | string   |
+| password | string   |
+
+#### Risks
+| `Nombre`    | `Tipo`   |
+|-------------|----------|
+| _id         | ObjectId |
+| risk        | string   |
+| description | string   |
+| active      | boolean  |
+
+#### Features
+| `Nombre`      | `Tipo`   | `Comentario`                            |
+|---------------|----------|-----------------------------------------|
+| _id           | ObjectId | Este id es el mismo del riesgo asociado | 
+| vulnerability | string   |                                         |
+| probability   | string   |                                         |
+| impact        | string   |                                         |
+| thread        | string   |                                         |
+
 ## Modo de uso
 
 Para lanzar la API, use el comando esto le permitirá hacer pruebas y verificar los resultados rápidamente
 
 ```shell
-flask --app main run --watch
+(venv) flask --app main run --watch
 ```
 
 Para identificar el modo de uso de la api navegar a la documentación en swagger:
 
 http://127.0.0.1:8000/swagger/
 
+## Pruebas
+
+Para verificar que la aplicación pasa todas las pruebas unitarias y funcionales antes de subir cualquier
+cambio, ejecute el siguiente comando:
+
+```shell
+(venv) py -m pytest -v
+```
+
+Si desea ver de forma más detallada el resultado de las pruebas, ejecute el siguiente comando:
+
+```shell
+(venv) py -m pytest --cov-report term-missing --cov=project
+```
 
 ## Colaboración
 
