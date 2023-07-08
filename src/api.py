@@ -1,40 +1,29 @@
-import os
-import pymongo
 import datetime
 import hashlib
+import os
+import pymongo
 import werkzeug.exceptions
 
-from dotenv import load_dotenv
-from bson import ObjectId
-from flask import Flask, request, jsonify, make_response
-from flask_jwt_extended import (
-    JWTManager,
-    create_access_token,
-    get_jwt_identity,
-    jwt_required,
-)
-from flask_pydantic import validate, ValidationError
-from pymongo import MongoClient
-from urllib.parse import quote_plus
+from . import app
+from flask import jsonify, request, make_response
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
+from flask_pydantic import validate
 from markupsafe import escape
+from pydantic import ValidationError
 from pymongo.errors import DuplicateKeyError
-from models import LoginModel, PaginationModel, OrderPaginationEnum, RiskModel
+from .models import LoginModel, PaginationModel, OrderPaginationEnum, RiskModel
+from .db import get_db_client
 
 
-app = Flask(__name__)
-load_dotenv()
+def handle_error(error):
+    return {'error': str(error)}, werkzeug.exceptions.InternalServerError.code
 
-# Initialize connection to db
-protocol = os.getenv("MONGO_DB_PROTOCOL")
-username = quote_plus(os.getenv("MONGO_DB_USERNAME"))
-password = quote_plus(os.getenv("MONGO_DB_PASSWORD"))
-cluster = os.getenv("MONGO_DB_CLUSTER")
-hostname = os.getenv("MONGO_DB_HOST")
+
+app.register_error_handler(Exception, handle_error)
+
 database = os.getenv("MONGO_DB_DATABASE")
-uri = f"{protocol}://{username}:{password}@{cluster}.{hostname}/{database}?retryWrites=true&w=majority"
 
-client = MongoClient(uri)
-
+client = get_db_client()
 db = client[database]
 
 risks_collection = db["Risks"]
@@ -48,43 +37,14 @@ users_collection.create_index("username")
 
 # initialize JWTManager
 jwt = JWTManager(app)
-app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 # define the life span of the token
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(days=1)
 
 
-@app.route("/api/v1/ping")
-def ping():
+@app.route("/api/v1/health-checker", methods=["GET"])
+def health_checker():
     return jsonify({"msg": "Hello, I am alive"}), 200
-
-
-@app.route("/api/v1/users", methods=["POST"])
-@jwt_required()
-def register():
-    try:
-        # Getting the user from access token
-        username_from_jwt = get_jwt_identity()
-        user_from_db = get_user_by_username(username_from_jwt)
-
-        if not user_from_db:
-            return jsonify({"error": "Access Token Expired"}), 404
-
-        # store the json body request
-        payload = request.get_json()
-
-        # Creating Hash of password and encrypt it to store in the database
-        payload["password"] = encrypt_password(payload["password"])
-
-        # If not exists than create one
-        if user_exists(payload["username"]):
-            return jsonify({"error": "Username already exists"}), 409
-
-        # Creating user
-        _ = users_collection.insert_one(payload)
-        return jsonify({"msg": "User created successfully"}), 201
-    except Exception as e:
-        app.logger.error(e)
-        return jsonify({"error": "Unexpected error"}), 500
 
 
 @app.route("/api/v1/login", methods=["POST"])
@@ -93,7 +53,7 @@ def login(body: LoginModel):
     try:
         user_from_db = get_user_by_username(body.username)
         if not user_from_db:
-            return jsonify({"error": "The username or password is incorrect"}), 401
+            return {"error": "The username or password is incorrect"}, 401
 
         # Check if password is correct
         encrypted_password = encrypt_password(body.password)
@@ -105,10 +65,39 @@ def login(body: LoginModel):
             # Return Token
             return jsonify(access_token=access_token), 200
 
-        return jsonify({"error": "The username or password is incorrect"}), 401
+        return {"error": "The username or password is incorrect"}, 401
     except Exception as e:
         app.logger.error(e)
-        return jsonify({"error": "Unexpected error"}), 500
+        return {"error": "Unexpected error"}, 500
+
+
+@app.route("/api/v1/users", methods=["POST"])
+@jwt_required()
+def register_user():
+    try:
+        # Getting the user from access token
+        username_from_jwt = get_jwt_identity()
+        user_from_db = get_user_by_username(username_from_jwt)
+
+        if not user_from_db:
+            return {"error": "Access Token Expired"}, 404
+
+        # store the json body request
+        payload = request.get_json()
+
+        # Creating Hash of password and encrypt it to store in the database
+        payload["password"] = encrypt_password(payload["password"])
+
+        # If not exists than create one
+        if user_exists(payload["username"]):
+            return {"error": "Username already exists"}, 409
+
+        # Creating user
+        _ = users_collection.insert_one(payload)
+        return {"msg": "User created successfully"}, 201
+    except Exception as e:
+        app.logger.error(e)
+        return {"error": "Unexpected error"}, 500
 
 
 @app.route("/api/v1/risks", methods=["POST"])
@@ -121,7 +110,7 @@ def create_risk(body: RiskModel):
         user_from_db = get_user_by_username(username_from_jwt)
 
         if not user_from_db:
-            return jsonify({"error": "Access Token Expired"}), 404
+            return {"error": "Access Token Expired"}, 404
 
         # Viewing if risk already present in collection
         body.risk = body.risk.lower()
@@ -148,10 +137,10 @@ def create_risk(body: RiskModel):
 
             transaction.with_transaction(cb)
 
-        return jsonify({"msg": "Risk created successfully"}), 201
+        return {"msg": "Risk created successfully"}, 201
     except Exception as e:
         app.logger.error(e)
-        return jsonify({"error": "Unexpected error"}), 500
+        return {"error": "Unexpected error"}, 500
 
 
 @app.route("/api/v1/risks/<int:risk_id>", methods=["PUT"])
@@ -186,7 +175,7 @@ def fetch_risks():
         user_from_db = get_user_by_username(username_from_jwt)
 
         if not user_from_db:
-            return jsonify({"error": "Access Token Expired"}), 404
+            return {"error": "Access Token Expired"}, 404
 
         query_parameters = request.args
         pagination = PaginationModel(**query_parameters)
@@ -194,43 +183,13 @@ def fetch_risks():
             risks_collection.aggregate(pipeline=get_query_to_fetch_risks(pagination))
         )
 
-        response = make_response(jsonify({"data": risks}), 200)
+        response = make_response({"data": risks}, 200)
         response.headers["x-total-count"] = risks[0]["count"]
 
         return response
     except Exception as e:
         app.logger.error(e)
-        return jsonify({"error": "Unexpected error"}), 500
-
-
-@app.errorhandler(404)
-def resource_not_found(e):
-    """
-    An error-handler to ensure that 404 errors are returned as JSON.
-    """
-    return jsonify(error=str(e)), 404
-
-
-@app.errorhandler(DuplicateKeyError)
-def resource_not_found(e):
-    return jsonify(error=f"Duplicate key error."), 400
-
-
-@app.errorhandler(werkzeug.exceptions.InternalServerError)
-def handle_exception(e):
-    app.logger.error(e)
-    return jsonify(error=f"Unexpected error."), 500
-
-
-@app.errorhandler(werkzeug.exceptions.MethodNotAllowed)
-def handle_exception(e):
-    app.logger.error(e)
-    return jsonify(error=f"Method not allowed."), 405
-
-
-@app.errorhandler(ValidationError)
-def handle_pydantic_validation_errors(e):
-    return jsonify(e.errors())
+        return {"error": "Unexpected error"}, 500
 
 
 def user_exists(username):
@@ -298,3 +257,34 @@ def get_query_to_fetch_risks(pagination: PaginationModel):
     )
 
     return query
+
+
+@app.errorhandler(werkzeug.exceptions.NotFound)
+def handle_not_found_error(e):
+    response = {
+        'error': f'route: {request.path} not found on this server'
+    }
+    return response, werkzeug.exceptions.NotFound.code
+
+
+@app.errorhandler(DuplicateKeyError)
+def duplicate_key_error_mongo(e):
+    response = {'error': 'Duplicate key error'}
+    return response, werkzeug.exceptions.BadRequest.code
+
+
+@app.errorhandler(werkzeug.exceptions.InternalServerError)
+def handle_internal_server_error(e):
+    app.logger.error(e)
+    return {'error': 'Unexpected error.'}, werkzeug.exceptions.InternalServerError.code
+
+
+@app.errorhandler(werkzeug.exceptions.MethodNotAllowed)
+def handle_method_not_allowed(e):
+    app.logger.error(e)
+    return {'error': 'Method not allowed.'}, werkzeug.exceptions.InternalServerError.code
+
+
+@app.errorhandler(ValidationError)
+def handle_pydantic_validation_errors(e):
+    return jsonify(error=e.errors()), werkzeug.exceptions.BadRequest.code

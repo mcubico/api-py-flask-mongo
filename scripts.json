@@ -1,0 +1,3 @@
+{
+  "start": "flask --app startup run --debug"
+}
