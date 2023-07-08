@@ -1,0 +1,458 @@
+{
+  "swagger": "2.0",
+
+  "info": {
+    "title": "Cyber Security Risks API",
+    "description": "API to get cyber security risks.",
+    "contact": {
+      "email": "mcubico33@gmail.com",
+      "name": "Mauricio Montoya Medrano",
+      "url": "https://linkedin.com/in/mcubico"
+    },
+    "license": {
+      "url": "https://github.com/mcubico/api-py-flask-mongo/blob/main/LICENSE",
+      "name": "MIT License"
+    },
+    "version": "1.0"
+  },
+
+  "externalDocs": {
+    "url": "https://github.com/mcubico/api-py-flask-mongo/blob/main/README",
+    "description": "Information about API and use instructions"
+  },
+
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+
+  "basePath": "/api",
+  "paths": {
+    "/health-checker": {
+      "get": {
+        "summary": "Validate the API state",
+        "description": "Used to validate the API state",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/login": {
+      "post": {
+        "summary": "User authentication",
+        "description": "Used by users to get token authentication",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "login",
+            "description": "Authentication data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "example": "joedoe@email.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password"
+                }
+              },
+              "required": ["username", "password"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access_token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request response.",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrorModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/users": {
+      "post": {
+        "security": [
+          {"Bearer": []}
+        ],
+        "summary": "Register a new user",
+        "description": "Used to register users, you need to authenticate first and paste the token into the shield, e.g. Bearer <jwt_token>",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "register",
+            "description": "Registration data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "example": "joedoe@email.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password"
+                }
+              },
+              "required": ["username", "password"]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request response.",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrorModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with data sent.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/risks": {
+      "post": {
+        "security": [
+          {"Bearer": []}
+        ],
+        "summary": "Register a new cyber security risk",
+        "description": "Used to register cyber security risks, you need to authenticate first and paste the token into the shield, e.g. Bearer <jwt_token>",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "register",
+            "description": "Registration data",
+            "schema": {
+              "$ref": "#/definitions/RiskModel",
+              "required": ["risk", "description", "active", "features"]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request response.",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrorModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with data sent.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "get": {
+        "security": [
+          {"Bearer": []}
+        ],
+        "summary": "Fetch cyber security risk",
+        "description": "Fetch cyber security risks, you need to authenticate first and paste the token into the shield, e.g. Bearer <jwt_token>",
+        "parameters": [
+          {"$ref": "#/parameters/PaginationQuery"},
+          {"$ref": "#/parameters/PaginationPage"},
+          {"$ref": "#/parameters/PaginationLimit"},
+          {"$ref": "#/parameters/PaginationOrderBy"},
+          {"$ref": "#/parameters/PaginationOrder"}
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "count": {"type": "integer"},
+                      "rows": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/RiskModel"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "Enter the token with the `Bearer: ` prefix, e.g. \"Bearer abcde12345\"."
+    }
+  },
+
+  "definitions": {
+    "RiskModel": {
+      "type": "object",
+      "description": "Properties that identify a risk",
+      "title": "Risk Model",
+      "properties": {
+        "risk": {"type": "string"},
+        "description": {"type": "string"},
+        "active": {"type": "boolean"},
+        "features": {"$ref": "#/definitions/FeaturesModel"}
+      }
+    },
+    "FeaturesModel": {
+      "type": "object",
+      "description": "Risk's feature",
+      "title": "Features Model",
+      "properties": {
+        "vulnerability": {"type": "string", "enum": ["high", "medium", "low"]},
+        "probability": {"type": "string", "enum": ["high", "medium", "low"]},
+        "impact": {"type": "string", "enum": ["high", "medium", "low"]},
+        "thread": {"type": "string", "enum": ["high", "medium", "low"]}
+      }
+    },
+    "ValidationErrorModel": {
+      "type": "object",
+      "description": "Response type when request is not correct",
+      "title": "Validation Error Model",
+      "properties": {
+        "validation_error": {
+          "type": "object",
+          "properties": {
+            "body_params": {
+              "type": "object",
+              "properties": {
+                "input": {"type": "object"},
+                "loc": {"type": "array"},
+                "msg": {"type": "string"},
+                "type": {"type": "string"},
+                "url": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "example": "{\n  \"validation_error\": {\n    \"body_params\": [\n      {\n        \"input\": {\n          \"passwords\": \"password\",\n          \"username\": \"joedoe@email.com\"\n        },\n        \"loc\": [\n          \"password\"\n        ],\n        \"msg\": \"Field required\",\n        \"type\": \"missing\",\n        \"url\": \"https://errors.pydantic.dev/2.1.2/v/missing\"\n      }\n    ]\n  }\n}"
+    },
+    "PaginationModel": {
+      "type": "object",
+      "description": "Pagination properties",
+      "title": "Pagination Model",
+      "properties": {
+        "query": {"type": "string"},
+        "page": {"type": "number"},
+        "limit": {"type": "number"},
+        "order_by": {"type": "string", "enum": ["vulnerability","probability","impact","threat"]},
+        "order": {"type": "string", "enum": ["asc","desc"]}
+      }
+    }
+  },
+
+  "parameters": {
+    "PaginationQuery": {
+      "in": "query",
+      "name": "query",
+      "type": "string",
+      "required": false,
+      "description": "To get risks by keywords"
+    },
+    "PaginationPage": {
+      "in": "query",
+      "name": "page",
+      "type": "integer",
+      "required": false,
+      "minimum": 1,
+      "default": 1,
+      "description": "To get results from specific page"
+    },
+    "PaginationLimit": {
+      "in": "query",
+      "name": "limit",
+      "type": "integer",
+      "required": false,
+      "minimum": 1,
+      "default": 10,
+      "description": "To specify total risks per page"
+    },
+    "PaginationOrderBy": {
+      "in": "query",
+      "name": "order_by",
+      "type": "string",
+      "enum": ["vulnerability","probability","impact","threat"],
+      "required": false,
+      "description": "To specify the column you want to order the records"
+    },
+    "PaginationOrder": {
+      "in": "query",
+      "name": "order",
+      "type": "string",
+      "enum": ["asc","desc"],
+      "required": false,
+      "description": "To specify the column you want to order the records"
+    }
+  }
+}
+

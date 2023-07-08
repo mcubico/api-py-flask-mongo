@@ -31,6 +31,12 @@ class LoginModel(BaseModel):
     username: str
     password: str
 
+    def to_json(self):
+        return {
+            'username': self.username,
+            'password': self.password
+        }
+
 
 class OrderPaginationEnum(str, Enum):
     ASCENDING = 'asc'
