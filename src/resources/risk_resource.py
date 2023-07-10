@@ -1,5 +1,5 @@
 import pymongo
-from flask import request, make_response
+from flask import request, make_response, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_pydantic import validate
 from flask_restful import Resource
@@ -7,6 +7,7 @@ from markupsafe import escape
 
 from src.models import RiskModel, PaginationModel, OrderPaginationEnum
 from src.mongo_database import MongoDataBase
+from src.utils.api_http_response_helper import make_api_http_response
 from src.utils.user_db_helper import UserDbHelper
 
 
@@ -57,7 +58,10 @@ class RiskResource(Resource):
 
             transaction.with_transaction(cb)
 
-        return {"msg": "Risk created successfully"}, 201
+        return make_api_http_response(
+            status=201,
+            message="Risk created successfully"
+        )
 
     @jwt_required()
     @validate()
@@ -68,7 +72,11 @@ class RiskResource(Resource):
         user_from_db = user_db_helper.find_user_by_username(username_from_jwt)
 
         if not user_from_db:
-            return {"error": "Access Token Expired"}, 404
+            return make_api_http_response(
+                status=404,
+                message="Access Token Expired",
+                error=True
+            ), 404
 
         query_parameters = request.args
         pagination = PaginationModel(**query_parameters)
@@ -76,7 +84,10 @@ class RiskResource(Resource):
             self._risks_collection.aggregate(pipeline=self.__get_query_to_fetch_risks(pagination=pagination))
         )
 
-        response = make_response({"data": risks}, 200)
+        response = make_response(make_api_http_response(
+            status=200,
+            data=risks
+        ), 200)
         response.headers["x-total-count"] = risks[0]["count"]
 
         return response

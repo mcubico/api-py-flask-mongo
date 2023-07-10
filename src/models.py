@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, TypedDict
 
 import pymongo
 from pydantic import BaseModel, Field
@@ -55,4 +55,11 @@ class PaginationModel(BaseModel):
     page: Optional[int] = 1
     limit: Optional[int] = 10
     order_by: Optional[ColumnOrderFetchRiskEnum] = None
-    order: Optional[OrderPaginationEnum] = OrderPaginationEnum.ASCENDING,
+    order: Optional[OrderPaginationEnum] = OrderPaginationEnum.ASCENDING
+
+
+class ApiHttpResponseModel(TypedDict):
+    status: str
+    message: Optional[str]
+    data: Optional[object]
+    error: Optional[bool]

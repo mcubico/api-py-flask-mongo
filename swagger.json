@@ -43,18 +43,14 @@
             "description": "Successful response.",
             "schema": {
               "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           }
         }
       }
     },
 
-    "/login": {
+    "/auth/login": {
       "post": {
         "summary": "User authentication",
         "description": "Used by users to get token authentication",
@@ -83,12 +79,7 @@
           "200": {
             "description": "Successful response.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "access_token": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           },
           "400": {
@@ -100,23 +91,13 @@
           "401": {
             "description": "Unauthorized response.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           },
           "500": {
             "description": "Unexpected error.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           }
         }
@@ -155,12 +136,7 @@
           "201": {
             "description": "Created.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           },
           "400": {
@@ -172,34 +148,19 @@
           "401": {
             "description": "Unauthorized response.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "msg": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           },
           "409": {
             "description": "Conflict with data sent.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           },
           "500": {
             "description": "Unexpected error.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           }
         }
@@ -228,12 +189,7 @@
           "201": {
             "description": "Created.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           },
           "400": {
@@ -245,34 +201,19 @@
           "401": {
             "description": "Unauthorized response.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "msg": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           },
           "409": {
             "description": "Conflict with data sent.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           },
           "500": {
             "description": "Unexpected error.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "error": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ApiResponseModel"
             }
           }
         }
@@ -294,6 +235,12 @@
         "responses": {
           "200": {
             "description": "Successful response",
+            "headers": {
+              "x-total-count": {
+                "type": "integer",
+                "description": "Total records query"
+              }
+            },
             "schema": {
               "type": "object",
               "properties": {
@@ -403,10 +350,21 @@
       "title": "Pagination Model",
       "properties": {
         "query": {"type": "string"},
-        "page": {"type": "number"},
-        "limit": {"type": "number"},
+        "page": {"type": "integer"},
+        "limit": {"type": "integer"},
         "order_by": {"type": "string", "enum": ["vulnerability","probability","impact","threat"]},
         "order": {"type": "string", "enum": ["asc","desc"]}
+      }
+    },
+    "ApiResponseModel": {
+      "type": "object",
+      "description": "API standard response",
+      "title": "API Response Model",
+      "properties": {
+        "status": {"type": "integer"},
+        "message": {"type": "string"},
+        "data": {"type": "object"},
+        "error": {"type": "boolean"}
       }
     }
   },

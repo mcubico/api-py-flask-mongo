@@ -1,9 +1,10 @@
 import datetime
 import json
 import os
-import werkzeug.exceptions
 
-from flask import jsonify, request
+import werkzeug.exceptions
+from flask import jsonify
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -18,6 +19,7 @@ from src.resources.user_resource import UserResource
 from src.utils.exception_management import handle_error, handle_not_found_error, duplicate_key_error_mongo, \
     handle_internal_server_error, handle_method_not_allowed, handle_pydantic_validation_errors
 
+# Add Routes
 api = Api(app=app, prefix='/api')
 api.app.register_error_handler(Exception, handle_error)
 api.app.register_error_handler(werkzeug.exceptions.NotFound, handle_not_found_error)
@@ -26,9 +28,16 @@ api.app.register_error_handler(werkzeug.exceptions.MethodNotAllowed, handle_meth
 api.app.register_error_handler(DuplicateKeyError, duplicate_key_error_mongo)
 api.app.register_error_handler(ValidationError, handle_pydantic_validation_errors)
 
+# Add CORS
+CORS(
+    api.app,
+    resources={
+        r"/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "PATCH", "DELETE"], "supports_credentials": True}
+    })
+
 # Add the resources to the API
 api.add_resource(HealthCheckerResource, '/', '/health-checker')
-api.add_resource(LoginResource, '/login')
+api.add_resource(LoginResource, '/auth/login')
 api.add_resource(UserResource, '/users')
 api.add_resource(RiskResource, '/risks')
 
