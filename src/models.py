@@ -1,5 +1,6 @@
+import datetime
 from enum import Enum
-from typing import List, Optional, TypedDict
+from typing import Optional, TypedDict
 
 import pymongo
 from pydantic import BaseModel, Field
@@ -25,6 +26,20 @@ class RiskModel(BaseModel):
     description: str
     active: bool
     features: FeatureModel
+
+
+class RolEnum(str, Enum):
+    ADMIN = 'admin'
+    GUESS = 'guess'
+
+
+class AccountModel(BaseModel):
+    id: int = Field(None, alias="_id")
+    first_name: str
+    last_name: str
+    username: str
+    password: str
+    rol: RolEnum = RolEnum.GUESS
 
 
 class LoginModel(BaseModel):

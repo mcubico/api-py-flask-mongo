@@ -42,7 +42,7 @@ api.add_resource(UserResource, '/users')
 api.add_resource(RiskResource, '/risks')
 
 # initialize JWTManager
-jwt = JWTManager(app)
+jwt = JWTManager(api.app)
 api.app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 # define the life span of the token
 api.app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(days=1)
@@ -57,7 +57,7 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
         'app_name': "Cyber Security Risks API"
     }
 )
-app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
+api.app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 
 @app.route('/swagger.json')
@@ -67,4 +67,4 @@ def swagger():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    api.app.run(debug=True)

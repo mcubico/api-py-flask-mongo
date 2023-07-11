@@ -1,11 +1,12 @@
 import pymongo
+import werkzeug.exceptions
+
 from flask import request, make_response, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_pydantic import validate
 from flask_restful import Resource
 from markupsafe import escape
-
-from src.models import RiskModel, PaginationModel, OrderPaginationEnum
+from src.models import RiskModel, PaginationModel, RolEnum, OrderPaginationEnum
 from src.mongo_database import MongoDataBase
 from src.utils.api_http_response_helper import make_api_http_response
 from src.utils.user_db_helper import UserDbHelper
@@ -32,13 +33,21 @@ class RiskResource(Resource):
         user_from_db = user_db_helper.find_user_by_username(username_from_jwt)
 
         if not user_from_db:
-            return {"error": "Access Token Expired"}, 404
+            return make_api_http_response(
+                status=werkzeug.exceptions.Unauthorized.code,
+                message="Access Token Expired",
+                error=True
+            ), werkzeug.exceptions.Unauthorized.code
 
         # Viewing if risk already present in collection
         body.risk = body.risk.lower()
         risk_from_db = self._risks_collection.find_one({"risk": body.risk})
         if risk_from_db:
-            return {"error": "Risk already exists"}, 404
+            return make_api_http_response(
+                status=werkzeug.exceptions.BadRequest.code,
+                message="Risk already exists",
+                error=True
+            ), werkzeug.exceptions.BadRequest.code
 
         with self._client.start_session() as transaction:
             def cb(transaction):
@@ -61,7 +70,7 @@ class RiskResource(Resource):
         return make_api_http_response(
             status=201,
             message="Risk created successfully"
-        )
+        ), 201
 
     @jwt_required()
     @validate()
@@ -73,10 +82,10 @@ class RiskResource(Resource):
 
         if not user_from_db:
             return make_api_http_response(
-                status=404,
+                status=werkzeug.exceptions.Unauthorized.code,
                 message="Access Token Expired",
                 error=True
-            ), 404
+            ), werkzeug.exceptions.Unauthorized.code
 
         query_parameters = request.args
         pagination = PaginationModel(**query_parameters)

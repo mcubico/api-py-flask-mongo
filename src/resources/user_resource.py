@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_pydantic import validate
 from flask_restful import Resource
 
-from src.models import LoginModel
+from src.models import AccountModel
 from src.mongo_database import MongoDataBase
 from src.utils.api_http_response_helper import make_api_http_response
 from src.utils.encrypt_helper import encrypt_password
@@ -21,7 +21,7 @@ class UserResource(Resource):
 
     @jwt_required()
     @validate()
-    def post(self, body: LoginModel):
+    def post(self, body: AccountModel):
         user_db_helper = UserDbHelper()
 
         # Getting the user from access token
@@ -47,7 +47,7 @@ class UserResource(Resource):
         body.password = encrypt_password(body.password)
 
         # Creating user
-        _ = self._users_collection.insert_one(body.to_json())
+        _ = self._users_collection.insert_one(body.model_dump())
         return make_api_http_response(
             status=201,
             message="User created successfully"
