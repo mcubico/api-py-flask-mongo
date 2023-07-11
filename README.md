@@ -46,12 +46,15 @@ venv\Scripts\activate
 ```
 api-py-flask-mongo
 ┣ src
+┃ ┣ constants
+┃ ┃ ┣ account_model_constants.py
 ┃ ┣ resources
 ┃ ┃ ┣ health_checker_resource.py
 ┃ ┃ ┣ login_resource.py
 ┃ ┃ ┣ risk_resource.py
 ┃ ┃ ┗ user_resource.py
 ┃ ┣ utils
+┃ ┃ ┣ api_http_response_helper.py
 ┃ ┃ ┣ encrypt_helper.py
 ┃ ┃ ┣ exception_management.py
 ┃ ┃ ┣ user_db_helper.py
@@ -116,11 +119,14 @@ Las demás variables deben ser diligenciadas con los datos de la cuenta de mongo
 | Features | Características de los riesgos                  |
 
 #### Users
-| `Nombre` | `Tipo`   |
-|----------|----------|
-| _id      | ObjectId |
-| username | string   |
-| password | string   |
+| `Nombre`   | `Tipo`   |
+|------------|----------|
+| _id        | ObjectId |
+| first_name | string   |
+| last_name  | string   |
+| username   | string   |
+| password   | string   |
+| rol        | string   |
 
 #### Risks
 | `Nombre`    | `Tipo`   |
