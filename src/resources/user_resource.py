@@ -3,6 +3,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_pydantic import validate
 from flask_restful import Resource
 
+from src.constants.account_model_constants import AccountModelConstants
+from src.constants.message_constants import MessageConstants
 from src.models import AccountModel
 from src.mongo_database import MongoDataBase
 from src.utils.api_http_response_helper import make_api_http_response
@@ -31,7 +33,7 @@ class UserResource(Resource):
         if not user_from_db:
             return make_api_http_response(
                 status=werkzeug.exceptions.Unauthorized.code,
-                message="Access Token Expired",
+                message=MessageConstants.ACCESS_TOKEN_EXPIRED,
                 error=True
             ), werkzeug.exceptions.Unauthorized.code
 
@@ -40,7 +42,7 @@ class UserResource(Resource):
         if user_from_db:
             return make_api_http_response(
                 status=werkzeug.exceptions.Conflict.code,
-                message="Username already exists",
+                message=MessageConstants.USER_ALREADY_EXISTS,
                 error=True
             ), werkzeug.exceptions.Conflict.code
 
@@ -50,8 +52,33 @@ class UserResource(Resource):
         _ = self._users_collection.insert_one(body.model_dump())
         return make_api_http_response(
             status=201,
-            message="User created successfully"
+            message=MessageConstants.USER_CREATED_SUCCESSFULLY
         ), 201
+
+    @jwt_required()
+    def get(self):
+        user_db_helper = UserDbHelper()
+
+        # Getting the user from access token
+        username_from_jwt = get_jwt_identity()
+        user_from_db = user_db_helper.find_user_by_username(username_from_jwt)
+
+        if not user_from_db:
+            return make_api_http_response(
+                status=werkzeug.exceptions.Unauthorized.code,
+                message=MessageConstants.ACCESS_TOKEN_EXPIRED,
+                error=True
+            ), werkzeug.exceptions.Unauthorized.code
+
+        return make_api_http_response(
+            status=200,
+            data={
+                AccountModelConstants.USERNAME: user_from_db.get(AccountModelConstants.USERNAME),
+                AccountModelConstants.FIRST_NAME: user_from_db.get(AccountModelConstants.FIRST_NAME),
+                AccountModelConstants.LAST_NAME: user_from_db.get(AccountModelConstants.LAST_NAME),
+                AccountModelConstants.ROL: user_from_db.get(AccountModelConstants.ROL),
+            }
+        )
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._client.close_db()

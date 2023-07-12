@@ -30,7 +30,7 @@ class RiskModel(BaseModel):
 
 class RolEnum(str, Enum):
     ADMIN = 'admin'
-    GUESS = 'guess'
+    GUEST = 'guest'
 
 
 class AccountModel(BaseModel):
@@ -39,7 +39,7 @@ class AccountModel(BaseModel):
     last_name: str
     username: str
     password: str
-    rol: RolEnum = RolEnum.GUESS
+    rol: RolEnum = RolEnum.GUEST
 
 
 class LoginModel(BaseModel):

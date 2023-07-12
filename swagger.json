@@ -117,18 +117,7 @@
             "name": "register",
             "description": "Registration data",
             "schema": {
-              "type": "object",
-              "properties": {
-                "username": {
-                  "type": "string",
-                  "example": "joedoe@email.com"
-                },
-                "password": {
-                  "type": "string",
-                  "example": "password"
-                }
-              },
-              "required": ["username", "password"]
+              "$ref": "#/definitions/UserModel"
             }
           }
         ],
@@ -153,6 +142,76 @@
           },
           "409": {
             "description": "Conflict with data sent.",
+            "schema": {
+              "$ref": "#/definitions/ApiResponseModel"
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "schema": {
+              "$ref": "#/definitions/ApiResponseModel"
+            }
+          }
+        }
+      },
+
+      "get": {
+        "security": [
+          {"Bearer": []}
+        ],
+        "summary": "Fetch data associated to user authenticated",
+        "description": "Fetch data associated to user authenticated, you need to authenticate first and paste the token into the shield, e.g. Bearer <jwt_token>",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {"type": "integer"},
+                "message": {"type": "string"},
+                "data": {"$ref": "#/definitions/UserModel"},
+                "error": {"type": "boolean"}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response.",
+            "schema": {
+              "$ref": "#/definitions/ApiResponseModel"
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "schema": {
+              "$ref": "#/definitions/ApiResponseModel"
+            }
+          }
+        }
+      }
+    },
+
+    "/users/me": {
+      "get": {
+        "security": [
+          {"Bearer": []}
+        ],
+        "summary": "Fetch data associated to user authenticated",
+        "description": "Fetch data associated to user authenticated, you need to authenticate first and paste the token into the shield, e.g. Bearer <jwt_token>",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {"type": "integer"},
+                "message": {"type": "string"},
+                "data": {"$ref": "#/definitions/UserModel"},
+                "error": {"type": "boolean"}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response.",
             "schema": {
               "$ref": "#/definitions/ApiResponseModel"
             }
@@ -299,6 +358,18 @@
   },
 
   "definitions": {
+    "UserModel": {
+      "type": "object",
+      "description": "Properties that identify an user",
+      "title": "User Model",
+      "properties": {
+        "first_name": {"type": "string"},
+        "last_name": {"type": "string"},
+        "username": {"type": "string"},
+        "password": {"type": "string"},
+        "rol": {"type": "string", "enum": ["admin", "guest"]}
+      }
+    },
     "RiskModel": {
       "type": "object",
       "description": "Properties that identify a risk",

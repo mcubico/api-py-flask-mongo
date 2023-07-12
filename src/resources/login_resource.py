@@ -1,10 +1,12 @@
 import werkzeug.exceptions
-from flask_jwt_extended import create_access_token
+from flask import jsonify
+from flask_jwt_extended import create_access_token, set_access_cookies
 from flask_pydantic import validate
 from flask_restful import Resource
 
 from src.constants.account_model_constants import AccountModelConstants
-from src.models import LoginModel, AccountModel
+from src.constants.message_constants import MessageConstants
+from src.models import LoginModel
 from src.utils.api_http_response_helper import make_api_http_response
 from src.utils.encrypt_helper import encrypt_password
 from src.utils.user_db_helper import UserDbHelper
@@ -21,20 +23,16 @@ class LoginResource(Resource):
         encrypted_password = encrypt_password(body.password)
         if encrypted_password == user_from_db[AccountModelConstants.PASSWORD]:
             access_token = create_access_token(
-                identity=user_from_db[AccountModelConstants.USERNAME],
-                additional_claims={
-                    AccountModelConstants.FIRST_NAME: user_from_db[AccountModelConstants.FIRST_NAME],
-                    AccountModelConstants.LAST_NAME: user_from_db[AccountModelConstants.LAST_NAME],
-                    AccountModelConstants.ROL: user_from_db[AccountModelConstants.ROL]
-                }
+                identity=user_from_db[AccountModelConstants.USERNAME]
             )
-
-            print('llego')
-            return make_api_http_response(
+            response = make_api_http_response(
                 status=200,
-                message="Success Authentication",
+                message=MessageConstants.SUCCESSFUL_AUTHENTICATION,
                 data={"access_token": access_token},
-            ), 200
+            )
+            set_access_cookies(jsonify(response), access_token)
+
+            return response
 
         return self.__get_user_or_password_incorrect_response(), werkzeug.exceptions.Unauthorized.code
 
@@ -42,6 +40,6 @@ class LoginResource(Resource):
     def __get_user_or_password_incorrect_response():
         return make_api_http_response(
             status=werkzeug.exceptions.Unauthorized.code,
-            message="The username or password is incorrect",
+            message=MessageConstants.USER_OR_PASSWORD_INCORRECT,
             error=True
         )

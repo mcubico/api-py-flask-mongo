@@ -1,7 +1,7 @@
 import werkzeug.exceptions
 from flask import request, jsonify
 
-from src import app
+from src import application
 from src.utils.api_http_response_helper import make_api_http_response
 
 

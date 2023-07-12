@@ -1,12 +1,14 @@
 import pymongo
 import werkzeug.exceptions
 
-from flask import request, make_response, jsonify
+from flask import request, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_pydantic import validate
 from flask_restful import Resource
 from markupsafe import escape
-from src.models import RiskModel, PaginationModel, RolEnum, OrderPaginationEnum
+
+from src.constants.message_constants import MessageConstants
+from src.models import RiskModel, PaginationModel, OrderPaginationEnum
 from src.mongo_database import MongoDataBase
 from src.utils.api_http_response_helper import make_api_http_response
 from src.utils.user_db_helper import UserDbHelper
@@ -35,7 +37,7 @@ class RiskResource(Resource):
         if not user_from_db:
             return make_api_http_response(
                 status=werkzeug.exceptions.Unauthorized.code,
-                message="Access Token Expired",
+                message=MessageConstants.ACCESS_TOKEN_EXPIRED,
                 error=True
             ), werkzeug.exceptions.Unauthorized.code
 
@@ -45,7 +47,7 @@ class RiskResource(Resource):
         if risk_from_db:
             return make_api_http_response(
                 status=werkzeug.exceptions.BadRequest.code,
-                message="Risk already exists",
+                message=MessageConstants.RISK_ALREADY_EXISTS,
                 error=True
             ), werkzeug.exceptions.BadRequest.code
 
@@ -69,7 +71,7 @@ class RiskResource(Resource):
 
         return make_api_http_response(
             status=201,
-            message="Risk created successfully"
+            message=MessageConstants.RISK_CREATED_SUCCESSFULLY
         ), 201
 
     @jwt_required()
@@ -83,7 +85,7 @@ class RiskResource(Resource):
         if not user_from_db:
             return make_api_http_response(
                 status=werkzeug.exceptions.Unauthorized.code,
-                message="Access Token Expired",
+                message=MessageConstants.ACCESS_TOKEN_EXPIRED,
                 error=True
             ), werkzeug.exceptions.Unauthorized.code
 
