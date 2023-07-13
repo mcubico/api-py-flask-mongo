@@ -1,3 +1,7 @@
 {
-  "start": "flask --app startup run --debug"
+  "run": "flask run",
+  "run-watch": "flask --app startup run --debug",
+  "build": "python -m build --wheel",
+  "venv": "venv\\Scripts\\activate",
+  "set-requirements": "pip freeze > requirements.txt"
 }

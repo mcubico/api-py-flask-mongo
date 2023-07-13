@@ -147,6 +147,8 @@ Las demás variables deben ser diligenciadas con los datos de la cuenta de mongo
 
 ## Modo de uso
 
+### Ambiente de desarrollo
+
 Para lanzar la API, use el comando esto le permitirá hacer pruebas y verificar los resultados rápidamente
 
 ```shell

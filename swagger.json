@@ -104,6 +104,75 @@
       }
     },
 
+    "/auth/logout": {
+      "get": {
+        "security": [
+          {"Bearer": []}
+        ],
+        "summary": "User logout",
+        "description": "Used by users to logout",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "$ref": "#/definitions/ApiResponseModel"
+            }
+          },
+          "400": {
+            "description": "Bad request response.",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrorModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized response.",
+            "schema": {
+              "$ref": "#/definitions/ApiResponseModel"
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "schema": {
+              "$ref": "#/definitions/ApiResponseModel"
+            }
+          }
+        }
+      }
+    },
+
+    "/token/refresh": {
+      "get": {
+        "summary": "It's used to refresh current token",
+        "description": "It's used to refresh current token, you need to be authenticated",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "$ref": "#/definitions/ApiResponseModel"
+            }
+          },
+          "400": {
+            "description": "Bad request response.",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrorModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized response.",
+            "schema": {
+              "$ref": "#/definitions/ApiResponseModel"
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "schema": {
+              "$ref": "#/definitions/ApiResponseModel"
+            }
+          }
+        }
+      }
+    },
+
     "/users": {
       "post": {
         "security": [

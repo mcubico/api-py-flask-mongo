@@ -1,6 +1,7 @@
 import werkzeug.exceptions
 from flask import jsonify
-from flask_jwt_extended import create_access_token, set_access_cookies
+from flask_jwt_extended import create_access_token, set_access_cookies, set_refresh_cookies, create_refresh_token, \
+    get_csrf_token
 from flask_pydantic import validate
 from flask_restful import Resource
 
@@ -21,20 +22,31 @@ class LoginResource(Resource):
 
         # Check if password is correct
         encrypted_password = encrypt_password(body.password)
-        if encrypted_password == user_from_db[AccountModelConstants.PASSWORD]:
-            access_token = create_access_token(
-                identity=user_from_db[AccountModelConstants.USERNAME]
-            )
-            response = make_api_http_response(
-                status=200,
-                message=MessageConstants.SUCCESSFUL_AUTHENTICATION,
-                data={"access_token": access_token},
-            )
-            set_access_cookies(jsonify(response), access_token)
+        if encrypted_password != user_from_db[AccountModelConstants.PASSWORD]:
+            return self.__get_user_or_password_incorrect_response(), werkzeug.exceptions.Unauthorized.code
 
-            return response
+        token_identity = user_from_db[AccountModelConstants.USERNAME]
+        access_token = create_access_token(identity=token_identity)
+        refresh_token = create_refresh_token(identity=token_identity)
+        access_csrf = create_refresh_token(access_token)
+        refresh_csrf = create_refresh_token(refresh_token)
 
-        return self.__get_user_or_password_incorrect_response(), werkzeug.exceptions.Unauthorized.code
+        response = make_api_http_response(
+            status=200,
+            message=MessageConstants.SUCCESSFUL_AUTHENTICATION,
+            data={
+                'access_token': access_token,
+                'refresh_token': refresh_token,
+                'access_csrf': access_csrf,
+                'refresh_csrf': refresh_csrf
+            },
+        )
+
+        response_json = jsonify(response)
+        set_access_cookies(response_json, access_token)
+        set_refresh_cookies(response_json, refresh_token)
+
+        return response_json
 
     @staticmethod
     def __get_user_or_password_incorrect_response():

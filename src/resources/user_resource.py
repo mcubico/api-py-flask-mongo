@@ -76,7 +76,7 @@ class UserResource(Resource):
                 AccountModelConstants.USERNAME: user_from_db.get(AccountModelConstants.USERNAME),
                 AccountModelConstants.FIRST_NAME: user_from_db.get(AccountModelConstants.FIRST_NAME),
                 AccountModelConstants.LAST_NAME: user_from_db.get(AccountModelConstants.LAST_NAME),
-                AccountModelConstants.ROL: user_from_db.get(AccountModelConstants.ROL),
+                AccountModelConstants.ROLE: user_from_db.get(AccountModelConstants.ROLE),
             }
         )
 

@@ -1,17 +1,17 @@
 import werkzeug.exceptions
 from flask import jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity, unset_jwt_cookies
+from flask_jwt_extended import get_jwt_identity, jwt_required, create_access_token, set_access_cookies
 from flask_restful import Resource
 
+from src.constants.account_model_constants import AccountModelConstants
 from src.constants.message_constants import MessageConstants
 from src.utils.api_http_response_helper import make_api_http_response
 from src.utils.user_db_helper import UserDbHelper
 
 
-class LogoutResource(Resource):
+class TokenResource(Resource):
     @jwt_required()
-    def post(self):
-        print('entro')
+    def get(self):
         user_db_helper = UserDbHelper()
 
         # Getting the user from access token
@@ -25,13 +25,17 @@ class LogoutResource(Resource):
                 error=True
             ), werkzeug.exceptions.Unauthorized.code
 
-        response = make_api_http_response(
-            status=200,
-            message=MessageConstants.LOGOUT_SUCCESSFUL
+        access_token = create_access_token(
+            identity=user_from_db[AccountModelConstants.USERNAME]
         )
 
-        unset_jwt_cookies(jsonify(response))
-        # TODO: Almacenar en una base de datos los tokens para poder refrescarlos y deshabilitarlos en caso de usar
-        #  los headers como autenticación
+        response = make_api_http_response(
+            status=200,
+            message=MessageConstants.TOKEN_SUCCESSFULLY_REFRESHED,
+            data={"access_token": access_token},
+        )
+
+        response_json = jsonify(response)
+        set_access_cookies(response_json, access_token)
 
         return response

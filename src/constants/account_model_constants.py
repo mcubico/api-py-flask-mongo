@@ -4,4 +4,4 @@ class AccountModelConstants:
     LAST_NAME = 'last_name'
     USERNAME = 'username'
     PASSWORD = 'password'
-    ROL = 'rol'
+    ROLE = 'role'
