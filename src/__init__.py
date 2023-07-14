@@ -9,7 +9,7 @@ def create_app():
     # the path to your .env file (or any other file of environment variables you want to load)
     load_dotenv('.env')
     is_production_env = os.environ.get('FLASK_ENV') == 'production'
-    settings_path = '../settings.py'
+    settings_path = 'settings.py'
     print(f'Environment: {os.environ.get("FLASK_ENV")}')
     if is_production_env:
         settings_path = 'settings.py'
